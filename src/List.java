@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 public class List<T extends Comparable<T>> {
     private long size;
     private Node<T> head;
@@ -44,7 +46,7 @@ public class List<T extends Comparable<T>> {
         }
 
         @Override
-        public int compareTo(T o) {
+        public int compareTo(@NotNull T o) {
             return data.compareTo(o);
         }
 
@@ -215,13 +217,13 @@ public class List<T extends Comparable<T>> {
         }
     }
 
-    public void emplaceBack(T...value) {
+    public void emplaceBack(T @NotNull ...value) {
         for (T it : value) {
             this.pushBack(it);
         }
     }
 
-    public void emplaceFront(T...value) {
+    public void emplaceFront(T @NotNull ...value) {
         for (T it : value) {
             this.pushFront(it);
         }
