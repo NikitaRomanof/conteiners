@@ -1,13 +1,11 @@
-public class List<T> {
+public class List<T extends Comparable<T>> {
     private long size;
     private Node<T> head;
     private Node<T> tail;
-
     public List() {
         this.size = 0;
         this.head = null;
         this.tail = null;
-
     }
 
     public void setSize(long size) {
@@ -34,7 +32,7 @@ public class List<T> {
         return tail;
     }
 
-    private class Node<T> {
+    private class Node<T extends Comparable<T>> implements Comparable<T> {
         public T data;
         public Node<T> prevNode;
         public Node<T> nextNode;
@@ -43,6 +41,24 @@ public class List<T> {
             this.data = data;
             this.prevNode = prevNode;
             this.nextNode = nextNode;
+        }
+
+        @Override
+        public int compareTo(T o) {
+            return data.compareTo(o);
+        }
+
+    }
+
+    public void cleanList() {
+        if (size > 0) {
+            Node<T> tmp = head;
+            while (tmp != null) {
+                tmp.prevNode = null;
+                tmp.data = null;
+                tmp = tmp.nextNode;
+                --size;
+            }
         }
     }
 
@@ -153,7 +169,6 @@ public class List<T> {
         for (long i = 0; i < pos; ++i) {
             tmp = tmp.nextNode;
         }
-
         if (tmp == head) {
             this.pushFront(value);
         } else if (tmp == tail) {
@@ -163,6 +178,52 @@ public class List<T> {
             tmp.prevNode.nextNode = curNode;
             tmp.prevNode = curNode;
             ++size;
+        }
+    }
+
+    public void sort() {
+        if (size > 1) {
+            long finish = size - 1;
+            while (finish != 0) {
+                Node<T> tmp = head;
+                for (long i = 0; i < finish; ++i) {
+                    if (tmp.data.compareTo(tmp.nextNode.data) > 0) {
+                        T bufData = tmp.nextNode.data;
+                        tmp.nextNode.data = tmp.data;
+                        tmp.data = bufData;
+                    }
+                    tmp = tmp.nextNode;
+                }
+                --finish;
+            }
+        }
+    }
+
+    public void reverse() {
+        if (size > 1) {
+            long finish = size - 1;
+            while (finish != 0) {
+                Node<T> tmp = head;
+                for (long i = 0; i < finish; ++i) {
+                        T bufData = tmp.nextNode.data;
+                        tmp.nextNode.data = tmp.data;
+                        tmp.data = bufData;
+                    tmp = tmp.nextNode;
+                }
+                --finish;
+            }
+        }
+    }
+
+    public void emplaceBack(T...value) {
+        for (T it : value) {
+            this.pushBack(it);
+        }
+    }
+
+    public void emplaceFront(T...value) {
+        for (T it : value) {
+            this.pushFront(it);
         }
     }
 

@@ -19,7 +19,9 @@ public class Main {
         test1.insert(0, -1);
         test1.insert(3, 11);
         test1.insert(5, 3);
+
         test1.printList();
+
 
 
     }
