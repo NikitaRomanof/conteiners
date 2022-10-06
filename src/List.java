@@ -146,7 +146,24 @@ public class List<T> {
     }
 
     public void insert(long pos, T value) {
+        if (pos > size - 1 || pos < 0) {
+            throw new IndexOutOfBoundsException("Position out of range");
+        }
+        Node<T> tmp = head;
+        for (long i = 0; i < pos; ++i) {
+            tmp = tmp.nextNode;
+        }
 
+        if (tmp == head) {
+            this.pushFront(value);
+        } else if (tmp == tail) {
+            this.pushBack(value);
+        } else {
+            Node<T> curNode = new Node<T>(value, tmp.prevNode, tmp);
+            tmp.prevNode.nextNode = curNode;
+            tmp.prevNode = curNode;
+            ++size;
+        }
     }
 
     public void printList() {

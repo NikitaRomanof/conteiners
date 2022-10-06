@@ -15,6 +15,11 @@ public class Main {
         test1.printList();
         test1.erase(3);
         test1.printList();
+        test1.insert(1, 10);
+        test1.insert(0, -1);
+        test1.insert(3, 11);
+        test1.insert(5, 3);
+        test1.printList();
 
 
     }
