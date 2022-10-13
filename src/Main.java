@@ -7,11 +7,11 @@ public class Main {
        test2.insert(6, 4);
        test2.insert(3, 5);
        test2.insert(2, 6);
-       Map<Integer, Integer>.IteratorMap first = test2.new IteratorMap();
-       first = first.begin();
+        test2.insert(1, 7);
+        test2.insert(0, 8);
+        test2.erase(3);
+       test2.printTree(null, "");
 
-       first.iteratorDecrement();
-        System.out.println(first.getKey() + " , " + first.getValue() );
 
 
 

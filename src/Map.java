@@ -338,8 +338,7 @@ public class Map<K extends Comparable<K>, V > {
         }
     }
 
-    private void changeBalance(Node<K, V> curNode) {
-        if (curNode != null) {
+    private void changeBalance(@NotNull Node<K, V> curNode) {
             if (curNode.left == null) {
                 curNode.leftDepth = 0;
             } else {
@@ -351,7 +350,173 @@ public class Map<K extends Comparable<K>, V > {
                 curNode.rightDepth = depthMax(curNode.right) + 1;
             }
             curNode.balance = curNode.leftDepth + curNode.rightDepth;
+    }
+
+    private Node<K, V> getCurNode(K keyCurr) {
+        Node<K, V> tmp = head;
+        while (tmp != null) {
+          if (tmp.key.compareTo(keyCurr) > 0) {
+              tmp = tmp.left;
+          } else if (tmp.key.compareTo(keyCurr) < 0) {
+              tmp = tmp.right;
+          } else if (tmp.key.compareTo(keyCurr) == 0) {
+              return tmp;
+          }
         }
+        return null;
+    }
+
+    public void erase(K keyDel) {
+        Node<K, V> curNode = getCurNode(keyDel);
+        if (curNode == null) {
+            throw new InvalidParameterException("Not access to current key");
+        }
+        if (curNode.parent != null) {
+            if (curNode.right == null && curNode.left == null) {
+                EraseNoParent(curNode);
+            } else if (curNode.left != null &&
+                    curNode.right == null) {
+
+                Node<K, V> buf = curNode.left;
+                while (buf.right != null) {
+                    buf = buf.right;
+                }
+                EraseRightOrLeftParent(curNode, buf);
+            } else if (curNode.left == null) {
+                Node<K, V> buf = curNode.right;
+                while (buf.left != null) {
+                    buf = buf.left;
+                }
+                EraseRightOrLeftParent(curNode, buf);
+            } else {
+                EraseTwoParent(curNode);
+            }
+        } else {
+            EraseHead(curNode);
+        }
+        --size;
+    }
+
+    private void EraseHead(@NotNull Node<K, V> pos) {
+        if (pos.right != null && pos.left != null) {
+            Node<K, V> buf = pos.right;
+            while (buf.left != null) {
+                buf = buf.left;
+            }
+            Node<K, V> bufParent = buf.parent;
+            Node<K, V> bufRight = buf.right;
+            buf.parent = null;
+            buf.left = pos.left;
+            pos.left.parent = buf;
+            if (bufParent == pos) {
+                buf.leftDepth = pos.leftDepth;
+                buf.rightDepth = bufRight == null ? 0 : 1;
+                buf.balance = buf.leftDepth + buf.rightDepth;
+                head = buf;
+                if (buf.balance == -2 && buf.left.balance <= 0) {
+                    smallRightTurn(buf);
+                } else if (buf.balance == -2) {
+                    bigRightTurn(buf);
+                }
+            } else {
+                buf.right = pos.right;
+                pos.right.parent = buf;
+                bufParent.left = null;
+                bufParent.leftDepth = 0;
+                head = buf;
+                if (bufParent.right == null) {
+                    bufParent.rightDepth = 0;
+                    bufParent.balance = 0;
+                    balancing(bufParent);
+                } else {
+                    bufParent.rightDepth -= 1;
+                    balancing(bufParent.right);
+                }
+            }
+            if (bufRight != null) {
+                insert(bufRight.key, bufRight.value);
+            }
+        } else if (pos.right != null || pos.left != null) {
+            if (pos.right == null) {
+                pos.left.parent = null;
+                head = pos.left;
+
+            } else {
+                pos.right.parent = null;
+                head = pos.right;
+            }
+        }
+        pos = null;
+    }
+
+    private void EraseNoParent(@NotNull Node<K, V> pos) {
+        if (pos.parent.left == pos) {
+            pos.parent.left = null;
+        } else {
+            pos.parent.right = null;
+        }
+        Node<K, V> buf = pos.parent;
+        pos = null;
+        balancing(buf);
+    }
+
+    private void EraseTwoParent(@NotNull Node<K, V> pos) {
+        Node<K, V> buf = pos.right;
+        while (buf.left != null) {
+            buf = buf.left;
+        }
+        //  изменяем связь родителя, указывая на буфер вместо удаляемого
+        if (pos.parent.left == pos) {
+            pos.parent.left = buf;
+        } else {
+            pos.parent.right = buf;
+        }
+        Node<K, V> bufParent = buf.parent;
+        Node<K, V> bufRight = buf.right;
+        buf.parent = pos.parent;
+        buf.left = pos.left;
+        pos.left.parent = buf;
+        //  if для малых деревьев, кода родитель буфера равен удаляемому
+        if (bufParent == pos) {
+            buf.leftDepth = pos.leftDepth + 1;
+            buf.rightDepth = bufRight == null ? 0 : 1;
+            balancing(buf.left);
+            //  else для больших деревьев, кода родитель буфера не равен удаляемому
+        } else {
+            buf.right = pos.right;
+            pos.right.parent = buf;
+            bufParent.left = null;
+            bufParent.leftDepth = 0;
+            buf.leftDepth = pos.leftDepth;
+            if (bufParent.right == null) {
+                bufParent.rightDepth = 0;
+                bufParent.balance = 0;
+                balancing(bufParent);
+            } else {
+                bufParent.rightDepth -= 1;
+                balancing(bufParent.right);
+            }
+        }
+
+        pos = null;
+        // если у буфера был сын справа его нужно удалить и по новой запушить
+        if (bufRight != null) {
+            insert(bufRight.key, bufRight.value);
+        }
+    }
+
+    private void EraseRightOrLeftParent(Node<K, V> pos, Node<K, V> buf) {
+        if (pos.parent.left == pos) {
+            pos.parent.left = buf;
+        } else {
+            pos.parent.right = buf;
+        }
+        buf.parent = pos.parent;
+        pos = null;
+        buf.balance = 0;
+        buf.leftDepth = 0;
+        buf.rightDepth = 0;
+        balancing(buf);
     }
 
 
