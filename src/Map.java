@@ -255,7 +255,7 @@ public class Map<K extends Comparable<K>, V > {
         changeBalance(bufR);
     }
 
-    void smallRightTurn(@NotNull Node<K, V> curNode) {
+    private void smallRightTurn(@NotNull Node<K, V> curNode) {
 
         if (curNode.parent != null) {
             if (curNode.parent.left == curNode) {
